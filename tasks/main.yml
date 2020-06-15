@@ -1,0 +1,78 @@
+---
+## Old Procedure to install TeamViewer 10 on Ubuntu 16.04
+
+- name: Copy Tviewer installationfile
+  copy: src=teamviewer_i386.deb dest="{{ tviewer_downloads_prefix }}" mode=0775 force=yes
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '16.04'
+
+- name: Install Teamviwer
+  apt: deb="{{ tviewer_downloads_prefix }}/teamviewer_i386.deb"
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '16.04'
+
+- name: Copy Tviewer script to destination system
+  copy: src=tviewer_start.sh dest="{{ tviewer_downloads_prefix }}" mode=0774 force=yes
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '16.04'
+
+- name: Configure TViewer on the remote machine
+  command: "{{ tviewer_downloads_prefix }}/tviewer_start.sh"
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '16.04'
+
+- name: Removing configuration file
+  file: path="{{ tviewer_downloads_prefix }}/tviewer_start.sh" state=absent
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '16.04'
+
+- name: Set default password
+  command: teamviewer passwd "{{ tviewer_pwd }}"
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '16.04'
+
+## Procedure to install the new TeamViewer on Ubuntu 20.04 with Internal option enabled.
+
+- name: Download TeamViewer package
+  get_url:
+    url: https://download.teamviewer.com/download/linux/teamviewer_amd64.deb
+    dest: "/tmp/teamviewer_amd64.deb"
+    force: yes
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
+
+- name: Install TeamViewer
+  apt:
+    deb: "/tmp/teamviewer_amd64.deb"
+    force: yes
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
+
+- name: Stop TeamViewer Service
+  command: teamviewer daemon stop
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
+
+- name: Setting TV to accept internal connection too
+  lineinfile:
+    dest: /opt/teamviewer/config/global.conf
+    line: "{{ item }}"
+  with_items:
+    - '[int32] EulaAccepted = 1'
+    - '[int32] General_DirectLAN = 1'
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
+
+- name: Set Teamviewer start automaticaly
+  command: teamviewer daemon enable
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
+
+- name: Set Teamviewer start
+  command: teamviewer daemon start
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
+
+- name: Set default password
+  command: teamviewer passwd Pass4TV
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
+
+- name: Enabling Teamviewer to Run in Login Screen
+  replace:
+    path: /etc/gdm3/custom.conf
+    regexp: '^#Way(.+)$'
+    replace: 'Way\1'
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
+
+
+
+
+

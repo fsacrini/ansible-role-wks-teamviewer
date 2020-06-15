@@ -1,0 +1,7 @@
+---
+tviewer_url: http://download.teamviewer.com/download/version_10x/teamviewer_i386.deb
+
+#Temporary password for tviewer. Change this password after the install. 
+tviewer_pwd: "12345678"
+
+tviewer_downloads_prefix: /tmp
